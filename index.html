@@ -1,0 +1,945 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html{color-scheme:light}body{margin:0}img{max-width:100%}[hidden]{display:none!important}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
+<title>Diwali Cracker Order</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Yatra+One&family=Hind:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: a festival price list. Sticky toolbar, category sections of product rows,
+   a fixed bottom bar with each person's running total. Rows are a grid that
+   becomes a two-tier card on phones. */
+:root{
+  --bg:#f3f2f7; --surface:#ffffff; --sunk:#e9e7f1; --line:#dcd9e6;
+  --fg:#1c1830; --muted:#6a6582; --accent:#d9730d; --accent-ink:#ffffff;
+  --m:#0f7c74; --n:#c26a00; --s:#b3245b; --yt:#cc1f1f; --ok:#1e7b46; --bad:#b3261e;
+  --cat-bg:#2a1f4a; --cat-fg:#fff6e8;
+  --display:"Yatra One","Georgia",serif;
+  --body:"Hind",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --radius:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#14121d; --surface:#1d1a29; --sunk:#262236; --line:#343048;
+  --fg:#eeebf7; --muted:#a39dbb; --accent:#f39a3d; --accent-ink:#1a1206;
+  --m:#3cc1b5; --n:#f0a443; --s:#ef6f9f; --yt:#ff5a5a; --ok:#5ccf8c; --bad:#ff7a70; --cat-bg:#3a2c66; --cat-fg:#fff6e8; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#14121d; --surface:#1d1a29; --sunk:#262236; --line:#343048;
+  --fg:#eeebf7; --muted:#a39dbb; --accent:#f39a3d; --accent-ink:#1a1206;
+  --m:#3cc1b5; --n:#f0a443; --s:#ef6f9f; --yt:#ff5a5a; --ok:#5ccf8c; --bad:#ff7a70; --cat-bg:#3a2c66; --cat-fg:#fff6e8; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:20px 150px}
+button,select,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 20px;margin-bottom:16px}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(28px,5vw,40px);line-height:1.05;margin:0;text-wrap:balance}
+h1 .spark{color:var(--accent)}
+.sub{color:var(--muted);margin:6px 0 0;font-size:14px}
+.sub a{color:inherit}
+.status{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;padding:6px 12px;border-radius:999px;background:var(--surface);border:1px solid var(--line);white-space:nowrap}
+.status i{width:8px;height:8px;border-radius:50%;background:var(--muted)}
+.status[data-s="saved"] i{background:var(--ok)}
+.status[data-s="saving"] i{background:var(--accent);animation:pulse 1s infinite}
+.status[data-s="error"] i,.status[data-s="readonly"] i,.status[data-s="local"] i{background:var(--bad)}
+@keyframes pulse{50%{opacity:.3}}
+@media (prefers-reduced-motion:reduce){.status i{animation:none!important}}
+
+.toolbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);display:flex;flex-wrap:wrap;gap:8px;padding-block:10px;border-bottom:1px solid var(--line);margin-bottom:8px}
+.toolbar input,.toolbar select{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:9px 12px;min-width:0}
+.toolbar input{flex:1 1 220px}
+.toolbar select{flex:0 1 auto}
+.notice{background:var(--sunk);border-radius:8px;padding:10px 14px;font-size:14px;margin:10px 0;color:var(--fg)}
+
+section.cat{margin-top:28px}
+.cat h2{display:flex;align-items:center;gap:8px 12px;flex-wrap:wrap;margin:0 0 10px;padding:12px 16px;border-radius:var(--radius);
+  background:var(--cat-bg);color:var(--cat-fg);font-family:var(--display);font-weight:400;font-size:clamp(20px,3.6vw,26px);line-height:1.15;letter-spacing:.01em}
+.cat h2 .tag{font-family:var(--body);font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:3px 10px;border-radius:999px;background:var(--accent);color:var(--accent-ink)}
+.cat h2 .count{margin-left:auto;font-family:var(--body);font-size:13px;font-weight:600;opacity:.8;font-variant-numeric:tabular-nums}
+
+.head,.row{display:grid;grid-template-columns:96px minmax(0,1fr) 92px 96px repeat(3,92px) 100px;align-items:center;gap:12px}
+.row .qty{padding-top:18px}
+.head{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700;padding:0 12px 6px}
+.head .r,.row .r{text-align:right}
+.head .pm{color:var(--m)} .head .pn{color:var(--n)} .head .ps{color:var(--s)}
+.list{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+.row{padding:10px 12px;border-top:1px solid var(--line)}
+.row:first-child{border-top:0}
+.row.picked{background:color-mix(in srgb,var(--accent) 7%,var(--surface))}
+.thumb{width:96px;height:96px;border-radius:10px;background:var(--sunk);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-decoration:none;color:var(--accent);font-size:12px;font-weight:700;border:1px solid var(--line);overflow:hidden;position:relative}
+.thumb svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.8}
+.thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#fff}
+.thumb:hover{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,var(--sunk))}
+.name{font-weight:600;line-height:1.3;overflow-wrap:anywhere}
+.meta{font-size:13px;color:var(--muted);margin-top:2px;font-variant-numeric:tabular-nums}
+.yt{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--yt);text-decoration:none;padding:6px 10px;border-radius:999px;border:1px solid color-mix(in srgb,var(--yt) 35%,transparent);white-space:nowrap;justify-self:start}
+.yt:hover{background:color-mix(in srgb,var(--yt) 10%,transparent)}
+.yt svg{width:14px;height:14px;fill:currentColor}
+.price{text-align:right;font-variant-numeric:tabular-nums}
+.price b{display:block;font-size:16px}
+.price s{font-size:12px;color:var(--muted)}
+.qty{display:flex;flex-direction:column;gap:2px}
+.qty label{display:none;font-size:12px;font-weight:700}
+.qty select{width:100%;padding:7px 6px;border-radius:8px;border:1px solid var(--line);background:var(--bg);font-variant-numeric:tabular-nums;font-weight:600;text-align:center}
+.qty select.on{border-color:currentColor;background:var(--surface)}
+.qty .pamt{min-height:18px;font-size:13px;font-weight:700;text-align:center;font-variant-numeric:tabular-nums;white-space:nowrap}
+.q-m{color:var(--m)} .q-n{color:var(--n)} .q-s{color:var(--s)}
+.qty select{color:var(--fg)} .qty select.on{color:inherit}
+.total{text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
+.total.zero{color:var(--muted);font-weight:400}
+.empty{padding:28px;text-align:center;color:var(--muted)}
+
+@media (max-width:820px){
+  .head{display:none}
+  .row{grid-template-columns:96px minmax(0,1fr) auto;grid-template-areas:"img name price" "img yt price" "qty qty qty";row-gap:6px;column-gap:12px}
+  .thumb{grid-area:img;align-self:start}
+  .row .nm{grid-area:name}
+  .row .yt{grid-area:yt}
+  .price{grid-area:price;align-self:start}
+  .qtys{grid-area:qty;display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) auto;gap:8px;align-items:end}
+  .qty label{display:block}
+  .row .qty{padding-top:0}
+  .total{align-self:start;padding-top:24px;min-width:64px}
+}
+@media (min-width:821px){ .qtys{display:contents} }
+
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:10;background:var(--surface);border-top:1px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px))}
+.bar-in{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) minmax(0,1.2fr) auto;gap:8px}
+.pdf{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-width:64px;padding:6px 12px;border-radius:8px;border:1.5px solid var(--fg);background:var(--surface);color:var(--fg);font-weight:700;font-size:13px;cursor:pointer}
+.pdf svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.pdf:hover{background:var(--sunk)} .pdf[disabled]{opacity:.6;cursor:progress}
+.bar-msg{max-width:1180px;margin:6px auto 0;font-size:13px;color:var(--fg)}
+.tile{border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:6px 10px;text-align:left;cursor:pointer;min-width:0}
+.tile[aria-pressed="true"]{border-color:currentColor;background:var(--surface)}
+.tile .who{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.tile .amt{font-size:17px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--fg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tile .cnt{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.tile.all{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.tile.all .amt,.tile.all .cnt{color:var(--accent-ink)}
+.tile.all[aria-pressed="true"]{outline:2px solid var(--fg);outline-offset:1px}
+@media (max-width:560px){
+  .bar-in{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .tile.all{grid-column:1 / span 2} .pdf{flex-direction:row;gap:6px}
+  .tile{padding:5px 8px} .tile .amt{font-size:15px}
+  .wrap{padding-block:20px 200px}
+}
+</style>
+<script src="config.js"></script>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1><span class="spark">✦</span> Diwali Cracker Order</h1>
+      <p class="sub">Goat Crackers price list from <a href="https://djcrackers.com/index.php?device=mobile" target="_blank" rel="noopener">djcrackers.com</a>. Final price is after the shop's discount. Pick quantities for each person. Every change saves straight away and shows up for everyone who has this page open.</p>
+    </div>
+    <span class="status" id="status" data-s="local" role="status" aria-live="polite"><i></i><span id="statusText">Connecting…</span></span>
+  </header>
+
+  <div id="notice" class="notice" hidden></div>
+
+  <div class="toolbar">
+    <input id="q" type="search" placeholder="Search by name or code" aria-label="Search products">
+    <select id="cat" aria-label="Category"><option value="">All categories</option></select>
+    <select id="show" aria-label="Show">
+      <option value="all">All items</option>
+      <option value="any">Picked by anyone</option>
+      <option value="Mansoor">Picked by Mansoor</option>
+      <option value="Nagendra">Picked by Nagendra</option>
+      <option value="Santosh">Picked by Santosh</option>
+    </select>
+  </div>
+
+  <div class="head" aria-hidden="true">
+    <span>Photo</span><span>Product</span><span>YouTube</span><span class="r">Price</span>
+    <span class="pm">Mansoor</span><span class="pn">Nagendra</span><span class="ps">Santosh</span><span class="r">Row total</span>
+  </div>
+
+  <main id="catalog"></main>
+</div>
+
+<nav class="bar" aria-label="Totals">
+  <div class="bar-in">
+    <button class="tile q-m" data-p="Mansoor" aria-pressed="false"><div class="who">Mansoor</div><div class="amt" id="t-Mansoor">₹0</div><div class="cnt" id="c-Mansoor">0 items</div></button>
+    <button class="tile q-n" data-p="Nagendra" aria-pressed="false"><div class="who">Nagendra</div><div class="amt" id="t-Nagendra">₹0</div><div class="cnt" id="c-Nagendra">0 items</div></button>
+    <button class="tile q-s" data-p="Santosh" aria-pressed="false"><div class="who">Santosh</div><div class="amt" id="t-Santosh">₹0</div><div class="cnt" id="c-Santosh">0 items</div></button>
+    <button class="tile all" data-p="any" aria-pressed="false"><div class="who">Grand total</div><div class="amt" id="t-all">₹0</div><div class="cnt" id="c-all">0 items</div></button>
+    <button class="pdf" id="pdfBtn" type="button" aria-label="Download order as PDF"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 19h14"/></svg><span>PDF</span></button>
+  </div>
+  <p class="bar-msg" id="barMsg" role="status" aria-live="polite" hidden></p>
+</nav>
+
+<script>
+// Source: djcrackers.com price list (Goat Crackers), read 2 Oct 2026.
+// Row: [code, name, content, actualPrice, finalPrice, image]
+// image: "p:<stamp>" -> .com/upload/product_image_<stamp>.webp
+//        "d:<file>"  -> djcrackers.com/upload/<file>.webp
+window.CATALOG = [
+ {cat:"COMBO PACK", note:"Net rate", items:[
+  ["267","HULKMAN PACK 3000 PACK","1BOX",3000,3000,"p:21_07_2026_12_22_25"],
+  ["268","IRONMAN PACK 4000PACK","1BOX",4000,4000,"d:1788420408_6a9921387d4bd"],
+  ["269","AVENGERSPACK PACK 5000PACK","1BOX",5000,5000,"p:21_07_2026_12_24_15"]
+ ]},
+ {cat:"ONE SOUND CRACKERS", note:"90% off", items:[
+  ["1","4' LAKSHMI ELEPHANT (10 PKT)","1BOX",2778.5,277.85,"p:30_06_2025_09_37_44"],
+  ["2","4' DELUXE LAKSHMI ELEPHANT (10 PKT)","1BOX",3704.66,370.47,"p:02_07_2025_11_37_06"],
+  ["4","3.5' LAKSHMIELEPHANT (10 PKT)","1BOX",2058.15,205.81,"p:02_07_2025_11_37_36"],
+  ["5","BIRD (1 PKT) elephant","1BOX",138.93,13.89,"p:02_07_2025_11_33_28"],
+  ["6","BIRD OFFER 10pkt OFFER","1BOX",771.8,77.18,"p:02_07_2025_11_38_05"],
+  ["7","3.5' LAKSHMI OFFER (10 PKT)","1BOX",1646.52,164.65,"p:02_07_2025_11_39_33"],
+  ["8","4' LAKSHMI OFFER (10 PKT)","1BOX",2222.8,222.28,"p:02_07_2025_11_39_51"],
+  ["9","4' DELUXE LAKSHMI OFFER (10 PKT)","1BOX",2572.68,257.27,"p:10_08_2025_12_42_40"],
+  ["10","4' GOLD DELUXE LAKSHMI OFFER (10 PKT)","1BOX",3087.22,308.72,"p:23_07_2026_10_34_02"],
+  ["11","5 SIZES LAKSHMI (5 PKT)","1BOX",3087.22,308.72,"p:02_07_2025_11_40_26"],
+  ["12","1/4 KG PAPER BOMB","1BOX",349.88,34.99,"p:05_07_2025_11_47_34"],
+  ["13","1/2 KG PAPER BOMB","1BOX",699.77,69.98,"p:05_07_2025_11_47_58"],
+  ["14","1 KG PAPER BOMB","1BOX",1399.54,139.95,"p:05_07_2025_11_48_21"],
+  ["15","AVATHAR","1BOX",2418.32,241.83,"p:23_07_2026_10_33_09"],
+  ["16","AVATHAR 2","1BOX",3087.22,308.72,"p:05_07_2025_11_49_27"],
+  ["18C","TIK TIK WATTER SPECIAL BIJILI","1BOX",1286.34,128.63,"d:1786511450_6a7c005ab9da8"]
+ ]},
+ {cat:"FLOWER POTS ELEPHANT", note:"90% off", items:[
+  ["18","FLOWER POTS BIG ELEPHANT","1BOX",869.22,86.92,"p:02_07_2025_11_43_07"],
+  ["19","FLOWER POTS SPECIAL ELEPHANT","1BOX",1298.83,129.88,"p:02_07_2025_11_42_32"],
+  ["20","FLOWER POTS GIANT ELEPHANT","1BOX",1818.36,181.84,"p:02_07_2025_11_41_38"],
+  ["21","FLOWER POTS SUPER (5 PCS)ELEPHANT","1BOX",1888.3,188.83,"d:1788420408_6a9921387d4bd"],
+  ["422","GANGA JUMANA VADIVEL","IBOX",999.1,99.91,"d:1788420408_6a9921387d4bd"]
+ ]},
+ {cat:"FLOWER POTS OFFER", note:"90% off", items:[
+  ["22","FLOWER POTS SMALL OFFER","1BOX",401.7,40.17,"p:02_07_2025_11_44_33"],
+  ["23","FLOWER POTS BIG OFFER","1BOX",515,51.5,"p:02_07_2025_11_46_12"],
+  ["24","FLOWER POTS SPECIAL OFFER","1BOX",669.5,66.95,"p:02_07_2025_11_46_30"],
+  ["25","FLOWER POTS ASOKA GIANT OFFER","1BOX",875.5,87.55,"p:02_07_2025_11_46_48"],
+  ["421","GANGA JAMUNA ASOK","1BOX",1545,154.5,"d:1788420408_6a9921387d4bd"]
+ ]},
+ {cat:"COLOUR KOTI OFFER", note:"90% off", items:[
+  ["26","COLOUR KOTI OFFER","1BOX",1266.9,126.69,"p:02_07_2025_12_08_04"],
+  ["27","COLOUR KOTI DELUXE OFFER","1BOX",2389.6,238.96,"p:02_07_2025_12_07_16"],
+  ["27A","COLOUR KOTI DELUXE 5PCS OFFER PRICES","1BOX",1215.4,121.54,"d:1788420408_6a9921387d4bd"]
+ ]},
+ {cat:"COLOUR KOTI", note:"90% off", items:[
+  ["28","COLOUR KOTI SPECIAL ELEPHANT","1BOX",1545,154.5,"p:02_07_2025_12_41_05"],
+  ["29","COLOUR KOTI GIANT ELEPHANT","1BOX",2121.8,212.18,"p:02_07_2025_12_40_37"],
+  ["30","COLOUR KOTI ELEPHANT","1BOX",2832.5,283.25,"p:02_07_2025_12_39_52"],
+  ["31","COLOUR KOTI DELUXE ELEPHANT","1BOX",4078.8,407.88,"p:02_07_2025_12_39_16"],
+  ["33","COLOUR KOTI PINK COLOUR VARASHINI F/W","1BOX",4274.5,427.45,"p:02_07_2025_12_38_14"],
+  ["34","COLOUR KOTI ASOK F/W","1BOX",3090,309,"p:02_07_2025_12_37_41"],
+  ["35","COLOUR KOTI DELUXE ASOK F/W","1BOX",4120,412,"p:02_07_2025_12_18_58"]
+ ]},
+ {cat:"GROUND CHAKKAR ELEPHANT", note:"90% off", items:[
+  ["36","GROUND CHAKKAR BIG ELEPHANT","1BOX",515,51.5,"p:03_07_2025_07_22_56"],
+  ["37","GROUND CHAKKAR BIG ELIPHANT(25 PCS)","1BOX",1236,123.6,"p:03_07_2025_07_23_24"],
+  ["38","GROUND CHAKKAR SPECIAL ELEPHANT","1BOX",1030,103,"p:03_07_2025_07_22_28"],
+  ["39","GROUND CHAKKAR DELUXE ELEPHANT @yes brant","1BOX",1462.6,146.26,"p:03_07_2025_07_21_31"],
+  ["40","CHAKKAR HOT WHEEL BIG ELEPHANT PLASTIC WHEEL","1BOX",648.9,64.89,"p:03_07_2025_07_20_46"],
+  ["41","CHAKKAR HOT WHEEL SPECIAL ELEPHANT","1BOX",1349.3,134.93,"p:03_07_2025_07_20_23"],
+  ["42","CHAKKAR HOT WHEEL DELUXE ELEPHANT","1BOX",1545,154.5,"p:03_07_2025_07_19_57"],
+  ["43","SPIN MASTER MINI RED AND GREEN ELEPHANT","1BOX",762.2,76.22,"p:03_07_2025_07_18_00"],
+  ["44","SPIN MASTER MAX RED AND GREEN ELEPHANT","1BOX",1349.3,134.93,"p:03_07_2025_07_17_01"],
+  ["45","MASKA CHASKA RED AND GREEN ELEPHANT 5PCS","1BOX",1308.1,130.81,"p:03_07_2025_07_16_35"],
+  ["46","LOTUS WHEEL ELEPHANT (5 PCS)","1BOX",1802.5,180.25,"p:03_07_2025_07_15_56"],
+  ["47","LOTUS WHEEL ELEPHANT (10 PCS)","1BOX",3419.6,341.96,"p:02_07_2025_12_42_36"],
+  ["48","LOTUS WHEEL AK (6PCS)","1BOX",2214.5,221.45,"p:10_08_2025_12_44_07"],
+  ["48A","WIRECHAKKAR ASOK 10PCS","1BOX",1854,185.4,"p:30_07_2025_10_21_38"],
+  ["48B","SUN FLOWER WHEEL 10PCS","1BOXZ",2770.7,277.07,"p:10_08_2025_12_16_49"],
+  ["48c","DRIZZLING WHEELS ELIPHANT","1box",1462.6,146.26,"p:23_07_2026_10_29_07"],
+  ["37 A","CHAKKAR ASOK 10PCS ASOK BRANT BLASTIK CHAKKAR","1BOX",1112.4,111.24,"d:1788420408_6a9921387d4bd"]
+ ]},
+ {cat:"CHAKKAR OFFER", note:"90% off", items:[
+  ["49","CHAKKAR BIG OFFER","1BOX",412,41.2,"p:08_07_2025_10_26_33"],
+  ["50","CHAKKAR SPECIAL OFFER","1BOX",772.5,77.25,"p:08_07_2025_10_26_58"],
+  ["51","CHAKKAR DELUXE OFFER","1BOX",1030,103,"p:08_07_2025_10_27_31"]
+ ]},
+ {cat:"TWINKLING STAR", note:"90% off", items:[
+  ["52","45CM TWINKLING STAR OFFER","1BOX",206,20.6,"p:08_07_2025_11_23_52"],
+  ["53","120CM TWINKLIG STAR OFEER","1BOX",515,51.5,"p:08_07_2025_11_23_16"],
+  ["54","45CM TWINKLING STAR ELEPHANT","1BOX",360.5,36.05,"p:05_07_2025_11_57_54"],
+  ["55","120CM TWINKLING STAR ELEPHANT","1BOX",978.5,97.85,"p:05_07_2025_11_57_39"]
+ ]},
+ {cat:"BIJILI", note:"90% off", items:[
+  ["56","RED BIJILI","1PKT",329.6,32.96,"p:08_07_2025_11_28_33"],
+  ["57","BIJILI sonny","1PKT",618,61.8,"p:08_07_2025_11_28_08"],
+  ["58","BIJILI VBM F/W","1PKT",515,51.5,"p:08_07_2025_11_27_05"],
+  ["59","BIJILI ASOK TIME PASS","1PKT",618,61.8,"p:08_07_2025_11_26_23"],
+  ["59AB","BIJILI MISEAN PCES SPECIAL ITAMES","1PKT",824,82.4,"p:23_07_2026_10_27_26"]
+ ]},
+ {cat:"SOUND CRACKERS", note:"90% off", items:[
+  ["60","TWO SOUND ELEPHINT","1PKT",401.7,40.17,"p:08_07_2025_11_32_02"],
+  ["61","THREE SOUND ELEPHANT","1PKT",525.3,52.53,"p:23_07_2026_10_24_06"],
+  ["62","TWO SOUND","1PKT",309,30.9,"p:08_07_2025_11_31_42"],
+  ["63","7SHOT ELEPHANT 5 PCS","1BOX",1483.2,148.32,"p:08_07_2025_12_41_21"],
+  ["64","7 SHOT 10 PCS ELEPHANT","1BOX",2925.2,292.52,"p:08_07_2025_12_39_51"],
+  ["65","penta 5colour","1BOX",1287.5,128.75,"p:08_07_2025_12_36_12"]
+ ]},
+ {cat:"BOMBS", note:"90% off", items:[
+  ["67","DELUXE BOMB","1BOX",1648,164.8,"p:03_07_2025_07_13_58"],
+  ["68","CLASSIC BOMB","1BOX",1030,103,"p:03_07_2025_07_12_55"],
+  ["70","AGNI BOMB","1BOX",1905.5,190.55,"p:03_07_2025_07_12_33"],
+  ["71","DIGITAL BOMB","1BOX",2060,206,"p:03_07_2025_07_10_25"]
+ ]},
+ {cat:"ROCKET", note:"90% off", items:[
+  ["72","ROCKET BOMB","1BOX",618,61.8,"p:23_07_2026_10_22_53"],
+  ["73","COLOUR ROCKET","1BOX",515,51.5,"p:10_08_2025_12_49_48"],
+  ["74","LUNIK ROCKET","1BOX",1287.5,128.75,"p:10_08_2025_12_48_36"],
+  ["77","MUSICAL ROCKET 10pcs","1BOX",1545,154.5,"p:23_07_2026_10_21_56"]
+ ]},
+ {cat:"WALA", note:"90% off", items:[
+  ["78","2000 WALA FULL OLD PINAL DIAF","1BOX",8240,824,"d:1788420408_6a9921387d4bd"],
+  ["79","2000 WALA SPECIAL","1BOX",5150,515,"d:1788420408_6a9921387d4bd"],
+  ["80","2000WALA VBM","1BOX",6180,618,"d:1788420408_6a9921387d4bd"],
+  ["81","5000 WALA HALF","1BOX",6437.5,643.75,"d:1788420408_6a9921387d4bd"],
+  ["82","5000 WALA FULL OLD PINALDIAP","1BOX",20600,2060,"d:1788420408_6a9921387d4bd"],
+  ["83","5000 WALA SPECIAL","1BOX",12875,1287.5,"d:1788420408_6a9921387d4bd"],
+  ["84","5000 WALA vbm","1BOX",15450,1545,"d:1788420408_6a9921387d4bd"],
+  ["85","10000 WALA HALF","1BOX",12875,1287.5,"d:1788420408_6a9921387d4bd"],
+  ["86","10000 WALA FULL OLD","1BOX",41200,4120,"d:1788420408_6a9921387d4bd"],
+  ["87","10000 WALA SPECIL","1BOX",25750,2575,"d:1788420408_6a9921387d4bd"],
+  ["88","10000 WALA VBM","1BOX",30900,3090,"d:1788420408_6a9921387d4bd"],
+  ["80A","2000 WALA HALF","1BOX",2575,257.5,"d:1788420408_6a9921387d4bd"],
+  ["78B","1000 WALA VBM","1BOX",3090,309,"d:1788420408_6a9921387d4bd"],
+  ["78C","1000 WALA SPECIAL","1BOX",2575,257.5,"d:1788420408_6a9921387d4bd"],
+  ["78D","1000 WALA FULL OLD BINAL DIP","1BOX",4120,412,"d:1788420408_6a9921387d4bd"],
+  ["78E","1000 WALA HALF","1BOX",1287.5,128.75,"d:1788420408_6a9921387d4bd"],
+  ["78A","90WATTS 3PCS","1BOX",1184.5,118.45,"d:1786538667_6a7c6aab6a82e"]
+ ]},
+ {cat:"FANCY FOUNTAIN", note:"90% off", items:[
+  ["89","SPRING FLOWER POTS ELEPHANT","1BOX",2091,209.1,"p:23_07_2026_10_18_39"],
+  ["90","BLUE FOUNTAIN ELEPHANT","1BOX",5151,515.1,"p:08_07_2025_12_42_28"],
+  ["91","VIOLET FOUNTAIN ELEPHANT","1BOX",5151,515.1,"p:08_07_2025_12_44_59"],
+  ["92","RAINBOW FOUNTAIN","1BOX",5151,515.1,"p:08_07_2025_12_49_39"],
+  ["96","NANO TRICOLOUR FRIENDS","1BOX",1377,137.7,"p:05_07_2025_12_48_01"],
+  ["97","MONO TRICOLOUR FRIENDS","1BOX",1887,188.7,"p:05_07_2025_12_47_15"],
+  ["98","TRICOLOUR FRIENDS","1BOX",2203.2,220.32,"p:05_07_2025_12_48_25"],
+  ["99","TRICOLOUR THREE STAR (3PCS)","1BOX",1275,127.5,"p:05_07_2025_12_49_03"]
+ ]},
+ {cat:"MINI FOUNTAIN", note:"90% off", items:[
+  ["100","COLOUR RAIN AK 5PCS","1BOX",772.5,77.25,"p:08_07_2025_01_00_50"],
+  ["101","PEACOCK FEATHER AK","1BOX",824,82.4,"d:1788420408_6a9921387d4bd"],
+  ["103","TWIXE 5IN 1 COLOUR AK","1BOX",1339,133.9,"p:08_07_2025_01_17_52"],
+  ["104","POLO MIX WINDOW PACK 5IN1","1BOX",1215.4,121.54,"p:08_07_2025_01_17_19"],
+  ["105","GOLDEN GLOBE AK","1BOX",772.5,77.25,"p:08_07_2025_01_12_47"],
+  ["107","LAYS 5PCS MINI MINES 5PCS ELEPHANT","1BOX",1874.6,187.46,"p:10_08_2025_12_52_43"],
+  ["109","TIN TITAN","1BOX",1287.5,128.75,"p:08_07_2025_01_11_53"],
+  ["110","MAGIC TREE 3PCS ELIPHANT","1BOX",1174.2,117.42,"p:08_07_2025_01_11_23"],
+  ["111","GOLD RUSH 3PCS ELIPHANT","1BOX",1174.2,117.42,"p:08_07_2025_01_11_03"],
+  ["112","COCK TAIL (3 PCS) MIX","1BOX",1174.2,117.42,"p:08_07_2025_12_56_32"],
+  ["100A","KIT KAT CRACKLING 10PCS","1BANDALS",2060,206,"p:23_07_2026_10_16_41"],
+  ["107A","H2O FALLS AK","1BOX",1215.4,121.54,"p:01_08_2025_11_16_23"],
+  ["107AB","PHOTA FLASH 5PCS","1BOX",700.4,70.04,"d:1788420408_6a9921387d4bd"],
+  ["107AS","PHOTA FLASH ELEPHANT","1BOX",1081.5,108.15,"p:23_07_2026_10_13_06"],
+  ["254XC","HELICOPTER","1BOX",669.5,66.95,"p:23_07_2026_10_12_06"],
+  ["126VB","GOOGLY SPINNERS 5PCS ELEPHANT","1BOX",1133,113.3,"p:23_07_2026_10_11_16"],
+  ["126VF","FAIRFLY 10PCS ELIPHANT","1BOX",1485.26,148.53,"p:23_07_2026_10_00_43"],
+  ["126BN","BUTTER FLY 10PCS","1BOX",1287.5,128.75,"p:23_07_2026_09_54_19"],
+  ["126NM","ROCK STAR @KRAZY KID 1PCS CRACKLING","1BOX",927,92.7,"d:1788420476_6a99217c70209"]
+ ]},
+ {cat:"MEGA FOUNTAIN", note:"90% off", items:[
+  ["113","KJ POT","1BOX",1442,144.2,"p:10_08_2025_12_55_24"],
+  ["114","SING POP AK","1BOX",1390.5,139.05,"p:15_07_2025_09_41_40"],
+  ["115","FOX STAR @ STAR FIRE FULL CRACKLING","1BOX",1184.5,118.45,"p:15_07_2025_09_32_04"],
+  ["116","STAR CRACKLING 6\" TUB FULL CRACKLING","1BOX",1545,154.5,"p:15_07_2025_09_33_38"],
+  ["117","COLOUR TREE 3STEAF COLOUR","1BOX",1545,154.5,"p:15_07_2025_09_34_09"],
+  ["118","JOLLY BOBBY 3PCS FULL CRACKLING ASOK F/W","1BOX",4377.5,437.75,"p:15_07_2025_09_35_00"],
+  ["119","JOLLY BOBBY MOCKTAIL TIN (3 PCS) COLOUR @CRACKLING ASOK F/W","1BOX",5047,504.7,"p:15_07_2025_09_34_40"],
+  ["120","CRACKLING DIAMOND ELEPHANT 1PCS ROLL","1BOX",2441.1,244.11,"p:15_07_2025_09_36_36"],
+  ["121","FLY BEE RED @FLY BE GREEN ELEPHANT 1PCS ROLL","1BOX",2441.1,244.11,"p:15_07_2025_09_37_24"],
+  ["122","XMASS TREE (3 PCS) ELEPHANT 3ITAMES","1BOX",1709.8,170.98,"p:15_07_2025_09_40_52"],
+  ["123","POP CORN ELEPHANT","1BOX",2925.2,292.52,"p:08_07_2025_01_29_20"],
+  ["124","OREO CHOGK ELEPHANT SPECIAL COLOUR B/P/R/Y/","1BOX",1545,154.5,"p:08_07_2025_01_28_07"],
+  ["125","MAD ANGELS ONE BY ONE TREE TIAMES COLOURS ELEPHANT","1BOX",2770.7,277.07,"p:08_07_2025_01_27_21"],
+  ["126","FOUR SQEARS FOUR ONE BY ONE FOUR TIAMES COLOURS ELEPHANT","1BOX",3337.2,333.72,"p:08_07_2025_01_22_52"],
+  ["127","WELCOME SHOW ONE BY ONE FIVE TIAMES COLOURS","1BOX",2575,257.5,"p:08_07_2025_01_22_30"],
+  ["128","PEACOCK 3 IN 1V CAKERS","1BOX",1390.5,139.05,"p:08_07_2025_01_21_53"],
+  ["129","PEACOCK 5 IN1 FEATHER V CAKERS","1BOX",1390.5,139.05,"p:08_07_2025_01_21_30"],
+  ["119AC","JOLLY BOBBY BIG DELIGHT TEQUILA STARS 1PCS TIN ASOK F/W","1 TIN",1648,164.8,"d:1788420505_6a99219961a4e"],
+  ["130","BADA PEACOCK BADA 5COLOUR V CAKERS","1BOX",3914,391.4,"p:08_07_2025_01_21_10"],
+  ["131","SUNRISES 2G ELEPHENT V CAKERS","1BOX",2605.9,260.59,"p:08_07_2025_01_19_56"],
+  ["132","MUMO JUMBO ELEPHAINT V CAKERS","1BOX",2111.5,211.15,"p:23_07_2026_09_53_46"],
+  ["133","ARJUN TANK ELEPHANT 4 TIAME VEARATY ITAMES","1BOX",3584.4,358.44,"p:08_07_2025_01_19_10"],
+  ["133D","MAGIC SPRINGS ELEPHANT 6PCS","1BOX",5860.7,586.07,"p:10_08_2025_12_24_55"],
+  ["133AD","TEDDY 5IN1 COLOUR","1BOX",2008.5,200.85,"p:23_07_2026_09_53_05"],
+  ["164BH","PEARAL DROPS AJANTHA","1BOX",3090,309,"p:23_07_2026_09_52_21"],
+  ["126A","SUPER HERO 5PCS ELEPHANT","1BOX",1601.65,160.16,"p:23_07_2026_09_51_31"],
+  ["126DF","DIN POP 3IN1 COLOURFOUNTAN 1SHOT 1CRACKLING","1BOX",2575,257.5,"p:23_07_2026_09_48_16"],
+  ["126HJ","COLOUR TREE ONE BY ONETREE COLOURS","1BOX",1699.5,169.95,"p:23_07_2026_09_46_06"],
+  ["126HK","STARCRACKLING","1BOX",1699.5,169.95,"p:23_07_2026_09_45_06"],
+  ["145CD","CRACKLING LASSAR 3PCS","1BOX",3090,309,"p:23_07_2026_09_44_08"],
+  ["119A","JOLLY BOBBY ALL THE WHILE TIN 1PCS ASOK F/W","1 TIN",1648,164.8,"d:1788420523_6a9921abb8f3d"],
+  ["119AB","JOLLY BOBBY GIGGLY FIZZ POP CORN ASOK F/W","1 TIN",1648,164.8,"d:1788420617_6a99220934dca"],
+  ["145VC","8 FANCY TIN THIRUMALA F/W","1 TIN",1648,164.8,"d:1788420559_6a9921cf416e2"],
+  ["145XS","KULFI 3PCS NEW","1BOX",2369,236.9,"d:1786510428_6a7bfc5c25946"],
+  ["113A","CYLINDER BOMB 2PCS","1BOX",2224.8,222.48,"d:1786538279_6a7c692762b08"],
+  ["145SD","RED BULLS THIRMALLA 1PCS SPECIAL COLOUR @CRACKLING","1BOX",1287.5,128.75,"d:1786538886_6a7c6b860fd70"],
+  ["145AW","MOJITO 2PCS 5 VARITY BOX","1BOX",2060,206,"d:1786539087_6a7c6c4f93a5a"],
+  ["113AC","6000 RAVIKANNAF/W","1BOX",1390.5,139.05,"d:1788420408_6a9921387d4bd"],
+  ["113AS","TWEET RAVIKANNA F/W","1BOX",1390.5,139.05,"d:1788420408_6a9921387d4bd"],
+  ["113AW","POPPINES RAVIKANNA F/W","1BOX",1390.5,139.05,"d:1788420408_6a9921387d4bd"],
+  ["145awe","monkey stars 5pcs","1box",1545,154.5,"d:1788420408_6a9921387d4bd"],
+  ["125XS","CAR RACING 5PCS","1BOX",1648,164.8,"d:1788420408_6a9921387d4bd"]
+ ]},
+ {cat:"FANCY PENCIL", note:"90% off", items:[
+  ["134","STAR RAIN AK 3PCS FULL CRACKLING","1BOX",2317.5,231.75,"p:09_07_2025_08_04_42"],
+  ["135A","NAVARAN PENCIL 5PCS","1BOX",1545,154.5,"p:09_07_2025_08_05_45"],
+  ["135B","NAYAGARA FALLA 3PCS","1BOX",1030,103,"p:09_07_2025_08_06_48"],
+  ["106R","COLOUR SOMAK 3PCS","1BOX",1213.93,121.39,"p:10_08_2025_12_56_17"],
+  ["135B","12 PENCIAL 10PCS","1BOX",1030,103,"p:10_08_2025_01_29_50"],
+  ["135C","10 PENCIAL","1BOX",824,82.4,"d:1788420408_6a9921387d4bd"],
+  ["135D","7 PENCIAL ELEPHANT","1BOX",360.5,36.05,"p:23_07_2026_09_41_16"],
+  ["134A","WOW TORCH SILVER CRACKLING 2PCS ELEPHANT","1BOX",2441.1,244.11,"p:23_07_2026_09_40_27"],
+  ["134B","SUPER TORCH GOLD CRACKLING 2PCS ELEPHANT","1BOX",3738.9,373.89,"p:23_07_2026_09_39_23"],
+  ["134AB","SELIFIE STICK ELEPHANT5PCS","1BOX",1442,144.2,"p:23_07_2026_09_38_43"],
+  ["134BN","COLOUR SOMSCK STICK 3PCS","1BOX",309,30.9,"p:23_07_2026_09_36_49"],
+  ["134VB","COLOUR SOMSCK","1BOX",1215.4,121.54,"p:23_07_2026_09_35_17"],
+  ["134AB","HAND FIRE DOLLAR ELEPHANT 2PCS","1BOX",2060,206,"d:1786538428_6a7c69bce0acd"]
+ ]},
+ {cat:"MINI ARIEL FANCY", note:"90% off", items:[
+  ["137","SONNY 777, GOLDEN TRRE,XMASS TREE, 5PCS","1BOX",1545,154.5,"d:1788420408_6a9921387d4bd"],
+  ["138","DUP TIP COLOUR TO TAIL CRACKLING 5PCS ELEPHANT","1BOX",1071.2,107.12,"p:09_07_2025_08_02_38"],
+  ["139","BATTLE SHOT 5PCS ELEPHANT","1BOX",1256.6,125.66,"p:09_07_2025_08_01_07"],
+  ["140","COCO LOCO CRACKLING TO COLOUR TAIL 2PCS ELEPHANT","1BOX",1071.2,107.12,"p:09_07_2025_08_00_14"],
+  ["142","WHATS APP (3 PCS) MINES TO COLOUR 3PCS ELEPHANT","1BOX",1957,195.7,"p:21_07_2026_12_59_23"],
+  ["254CS","BAMBARAM","1BOX",669.5,66.95,"p:23_07_2026_09_34_02"],
+  ["137A","ARMY FORCE","1BOX",1184.5,118.45,"p:21_07_2026_12_55_09"],
+  ["145ad","shooting star","1box",2018.8,201.88,"p:21_07_2026_12_54_33"],
+  ["137A","BEAST SHOW 6PCS AK","1BOX",772.5,77.25,"d:1788420719_6a99226f108c1"]
+ ]},
+ {cat:"MEGA ARIEL FANCY ELEPHANT", note:"90% off", items:[
+  ["143","CHOTTA FANCY OFFER","1BOX",412,41.2,"p:10_08_2025_11_54_43"],
+  ["144","CHOTTA FANCY (5 PCS) ELEPHANT","1BOX",3090,309,"p:03_07_2025_07_09_51"],
+  ["145","CHOTTA FANCY MINI (6 PCS)","1BOX",1546.55,154.65,"p:10_08_2025_11_54_00"],
+  ["146","2' FANCY ELEPHANT","1BOX",1565.6,156.56,"p:03_07_2025_07_09_20"],
+  ["147","2.5' FANCY ELEPHANT 9 COLOURS VARIETYS","1BOX",2688.3,268.83,"p:03_07_2025_07_08_54"],
+  ["148","3.5' FANCY ELEPHANT 18 COLOURS VARIETYS","1BOX",4068.5,406.85,"p:03_07_2025_07_08_31"],
+  ["149","3.5' PIPE 7 WONDERS ELEPHANT","1BOX",3903.7,390.37,"p:10_08_2025_12_57_39"],
+  ["150","4.5' FANCY PIPE ELIPHANT ONEBALL COLOUR","1BOX",11875.9,1187.59,"p:03_07_2025_07_06_04"],
+  ["151","4.5' PIPE DOUBLE BALL ELEPHANT ONEBALL COLOUR ONEBALL FULLCRACKLING VARIETYS","1BOX",13338.5,1333.85,"p:03_07_2025_07_04_45"],
+  ["152","2' FANCY XXX ELEPHANT (3 PCS)","1BOX",4429,442.9,"p:03_07_2025_07_03_30"],
+  ["153","2' FANCY LOVE ALL ELEPHANT 3pcs","1BOX",5695.9,569.59,"p:03_07_2025_07_03_05"],
+  ["150A","TRIPLE TREAT ELEPHANT 3PCS","1BOX",11062.2,1106.22,"p:30_07_2025_10_19_37"],
+  ["150B","9 PLANETARIAM COMBO PACK ELIPHANT","1BOX",23587,2358.7,"p:10_08_2025_12_27_40"],
+  ["150AB","3.5'PIP GOLDEN EYE (5.1)COMBO 2026 NEW","1BOX",19518.5,1951.85,"p:21_07_2026_12_53_00"],
+  ["150AC","3.5PIP NAVARANG 9.1COMBOPACK ELEPHANT","1BOX",35143.6,3514.36,"p:21_07_2026_12_52_35"],
+  ["150AD","3.5PIP TRIPLE TREAT 3PCS ELEPHANT","1BOX",11062.2,1106.22,"p:21_07_2026_12_51_57"],
+  ["164AB","12SHOT 6 IN 1BOX ELEPHANT 6BOX","1BOX",7323.3,732.33,"p:21_07_2026_12_49_20"]
+ ]},
+ {cat:"ARIEL FANCY", note:"90% off", items:[
+  ["154","2' PIPE 3 pcs","1BOX",2060,206,"d:1788420408_6a9921387d4bd"],
+  ["155","2.5' PIPE FANCY","1BOX",1236,123.6,"p:12_07_2025_12_16_51"],
+  ["156","3.5' PIPE FANCY","1BOX",2575,257.5,"p:12_07_2025_12_16_34"],
+  ["157","3.5' PIPE NAYAGARA FALLS","1BOX",2575,257.5,"p:10_08_2025_12_58_35"],
+  ["157A","4;PIPE FANCY BALL","1BOX",3090,309,"p:10_08_2025_01_32_22"],
+  ["157AB","5' PIPE FANCY BALL","1BOX",8240,824,"p:21_07_2026_12_48_26"],
+  ["157AD","5'PIP BLUE COLOUR BALL","1BOX",9785,978.5,"p:21_07_2026_12_46_32"],
+  ["157AS","5;PIPE PINKY COLOUR BALL","1BOX",9785,978.5,"p:21_07_2026_12_44_25"]
+ ]},
+ {cat:"SONNY ARIEL FANCY", note:"90% off", items:[
+  ["158","4 PIPE SINNY GRET-WALL SERIES (2PCS)","1BOX",9785,978.5,"p:10_08_2025_12_59_59"],
+  ["159","4.5' PIPE 2pcs sonny MONO PIP","1BOX",12360,1236,"p:07_07_2025_11_59_13"],
+  ["160","5' PIPE SONNY HAPPY NEW YEAR RING SERIES 2PCS dous","1BOX",12360,1236,"p:03_07_2025_07_02_30"],
+  ["161","6' PIP SONICK THANOS FLASH MIX SONNY","1BOX",15450,1545,"p:07_07_2025_11_58_35"],
+  ["159 v","5 OSCARS SONNY 2PCS","1BOX",13390,1339,"p:21_07_2026_12_39_57"]
+ ]},
+ {cat:"SPECIAL COLOUR ARIEL FANCY", note:"90% off", items:[
+  ["162","3.5' NEELA ANGELS ELEPHANT","1BOX",5695.9,569.59,"p:12_07_2025_12_19_06"],
+  ["163","3.5' GOD FEATHER ELEPHANT","1BOX",5695.9,569.59,"p:12_07_2025_12_18_47"]
+ ]},
+ {cat:"REPEATING SHOT ELEPHANT", note:"90% off", items:[
+  ["164","12 COLOUR SHOT DELUXE SHOT ELEPHANT","1BOX",2441.1,244.11,"p:12_07_2025_12_20_00"],
+  ["165","25 SHOT COLOUR CRACKLING ELEPHANT","1BOX",6509.6,650.96,"p:03_07_2025_06_59_22"],
+  ["166","50 SHOT COLOUR CRACKLING ELEPHANT","1BOX",7158.5,715.85,"p:03_07_2025_06_59_58"],
+  ["167","12 SHOT UFO FLY WHEEL TO CHAKKAR ELEPHANT","1BOX",2863.4,286.34,"p:21_07_2026_12_38_49"],
+  ["168","12 SHOT mummyTO CRACKLING ELEPHANT","1BOX",2441.1,244.11,"p:12_07_2025_12_22_22"],
+  ["169","25 SHOT BLAZE COLOURTAIL TO CRACKLING ELEPHANT","1BOX",6509.6,650.96,"p:03_07_2025_06_39_50"],
+  ["170","50 SHOT BANG BANG COLOURTAIL TO CRACKLING ELEPHANT","1BOX",12689.6,1268.96,"p:03_07_2025_06_39_15"],
+  ["171","12 SHOT DANDIYA BUSTLE TAIL TO COLOUR ELEPHANT","1BOX",6262.4,626.24,"p:12_07_2025_12_23_24"],
+  ["172","25 SHOT KICK BUSTLE TAIL TO COLOUR ELEPHANT","1BOX",10732.6,1073.26,"p:03_07_2025_06_38_43"],
+  ["173","50 SHOT FANTASTIC BUSTLE TAI TO COLOUR ELEPHANT","1BOX",19683.3,1968.33,"p:03_07_2025_06_38_09"],
+  ["174","100 SHOT CELEBRATION BUSTLE TAIL TO COLOUR ELEPHANT","1BOX",39366.6,3936.66,"p:03_07_2025_06_37_43"],
+  ["175","200 SHOT BIGGEST BUSTLE TAILTO COLOUR ELEPHANT","1BOX",76951.3,7695.13,"p:03_07_2025_06_37_04"],
+  ["176","30 SHOT NIGHT INDIA ELEPHANT","1BOX",7725,772.5,"p:03_07_2025_06_36_37"],
+  ["177","60 SHOT JACK POT ELEPHANT","1BOX",14234.6,1423.46,"p:03_07_2025_06_34_28"],
+  ["178","80 SHOT GUNS N ROSES ELEPHANT","1BOX",18787.2,1878.72,"p:03_07_2025_06_33_20"],
+  ["180","120 SHOT RNG DE BASANTHI ELEPHANT","1BOX",28304.4,2830.44,"p:12_07_2025_12_24_22"],
+  ["181","240 SHOT ROMANCE ELEPHANT","1BOX",54662.1,5466.21,"p:12_07_2025_12_35_26"],
+  ["182","500 SHOT FEAST ELEPHANT","1BOX",111435.7,11143.57,"p:12_07_2025_12_37_23"],
+  ["183","10 SHOT COLOUR AND CRACKLING ELEPHANT","1BOX",3584.4,358.44,"p:12_07_2025_12_38_15"],
+  ["184","120 SHOT TRANSFORMERS COLOUR AND CRACKLING ELEPHANT","1BOX",30096.6,3009.66,"p:03_07_2025_06_31_43"],
+  ["185","240 SHOT ENJOY COLOUR AND CRACKLING ELEPHANT","1BOX",60193.2,6019.32,"p:03_07_2025_06_30_22"],
+  ["186","30 SHOT SILVER FULL CRACKLING ELEPHANT","1BOX",10248.5,1024.85,"p:03_07_2025_06_31_16"],
+  ["187","60 SHOT SILVER FULL CRACKLING ELEPHANT","1BOX",18787.2,1878.72,"p:03_07_2025_06_30_50"],
+  ["188","25 SHOT KARATGOLD CRACKLING ELEPHANT","1BOX",10248.5,1024.85,"p:03_07_2025_06_18_35"],
+  ["189","25 SHOT BLUE DIAMOND ELEPHANT","1BOX",11062.2,1106.22,"p:03_07_2025_06_18_04"],
+  ["190","25 SHOT PURPLE DIAMOND ELEPHANT","1BOX",11062.2,1106.22,"p:03_07_2025_06_17_50"],
+  ["191","20 SHOT PEACOCK DANCE ELEPHANT","1BOX",14471.5,1447.15,"p:03_07_2025_06_17_04"],
+  ["192","40 SHOT PEACOCK DANCE DELUXE ELEPHANT","1BOX",27336.2,2733.62,"p:03_07_2025_06_15_57"],
+  ["193","7*10 DIGITAL RAIN COLOUR TAIL TO CRACKLING","1BOX",20497,2049.7,"p:03_07_2025_06_40_08"],
+  ["164a","ZUMBA@ RUMBA ELEPHANT","1BOX",3584.4,358.44,"p:30_07_2025_09_49_05"],
+  ["164AB","ROCK@ROLL ELIEPHANT","1BOX",3440.2,344.02,"p:21_07_2026_12_37_13"],
+  ["164AS","50SHOT BANGBANG","1BOX",11845,1184.5,"p:21_07_2026_12_36_39"],
+  ["164CV","25 GOLD KARAT ELEPHANT","1BOX",9568.7,956.87,"p:21_07_2026_12_34_10"],
+  ["164DS","25SHOTCOLOUR CRACKLING ELEPHANT","1BOX",3646.2,364.62,"p:21_07_2026_12_33_26"]
+ ]},
+ {cat:"REPEATING SHOT EANY", note:"90% off", items:[
+  ["194","12 SHOT","1BOX",1184.5,118.45,"p:12_07_2025_12_41_02"],
+  ["195","15 SHOT MULTICOLOUR","1BOX",2500,250,"p:04_07_2025_07_34_07"],
+  ["196","30 SHOT MULTICOLOUR","1BOX",3800,380,"p:04_07_2025_07_34_49"],
+  ["197","60 SHOT MULTICOLOUR","1BOX",7600,760,"p:04_07_2025_07_33_25"],
+  ["198","120 SHOT MULTICOLOUR","1BOX",15200,1520,"p:04_07_2025_07_31_31"],
+  ["199","240 SHOT MULTICOLOUR","1BOX",31312,3131.2,"p:04_07_2025_07_29_53"],
+  ["200","500 SHOT MULTICOLOUR","1BOX",62830,6283,"p:04_07_2025_07_29_38"],
+  ["202A","20@20 CRACKLING SHOT MEGA WINNER BRAND","1BOX",4120,412,"p:15_07_2026_11_34_53"],
+  ["202AB","25SHOT DILDIL CRACKLING RAIDER RAVIKANNA","1BOX",2678,267.8,"d:1788420751_6a99228f84f55"]
+ ]},
+ {cat:"MEGA SIZES PIPE SHOT", note:"90% off", items:[
+  ["203","25 SHOT JAZZ USA BLOCK BUSTERS10 COLOUR ELEPHANT","1BOX",16758.1,1675.81,"p:03_07_2025_06_14_18"],
+  ["204","36 SHOT 2' PIPE PYROGEMS 10 COLOUR CRACKLING ELEPHANT","1BOX",54497.3,5449.73,"p:30_07_2025_09_55_49"],
+  ["205","25 SHOT 2.5' PIPEE ART IN THE SKY 12 COLOUR ELEPHANT","1BOX",69957.6,6995.76,"p:03_07_2025_06_12_02"],
+  ["206","24 SHOT 3' PIPEE OSCAR 12 COLOUR ELEPHANT","1BOX",95656.1,9565.61,"p:03_07_2025_06_11_40"],
+  ["207","24 SHOT 3.5' PIPEE MARVELOUS 12 COLOUR ELEPHANT","1BOX",124702.1,12470.21,"p:03_07_2025_06_11_27"]
+ ]},
+ {cat:"V SAPE SHOTS", note:"90% off", items:[
+  ["208","3*12 SHOT MINES ELEPHANT","1BOX",40994,4099.4,"p:03_07_2025_06_10_43"],
+  ["210","3*10 SHOT 2' PIPEE FULL CRACKLING ELEPHANT","1BOX",59791.5,5979.15,"p:03_07_2025_06_10_11"],
+  ["211","4*6 SHOT 2.5' PIPEE 6 COLOUR ELEPHANT","1BOX",71420.2,7142.02,"p:03_07_2025_06_09_46"],
+  ["212","3*6 SHOT 3' PIPEE 6 COLOUR ELEPHANT","1BOX",77033.7,7703.37,"p:03_07_2025_06_09_15"],
+  ["213","10*10 SHOT ELEPHANT","1BOX",30900,3090,"p:10_08_2025_01_01_34"],
+  ["208A","FANCACKE SONNY 100SHOT","1BOX",43311.5,4331.15,"p:21_07_2026_12_28_54"]
+ ]},
+ {cat:"ASOK SHOTS", note:"90% off", items:[
+  ["215","30 SHOT GARBA NIGHT ASOK F/W","1BOX",6540.5,654.05,"p:12_07_2025_12_42_56"],
+  ["217","120 SHOT EUPHORIA ASOK F/W","1BOX",26162,2616.2,"p:12_07_2025_12_45_31"],
+  ["218A","GANABANGERS ASOK","1BOX",25750,2575,"p:12_07_2025_12_50_02"]
+ ]},
+ {cat:"SPARKLERS", note:"90% off", items:[
+  ["219","7CM ELECTRIC SPARKLERS 10BOX","10BOX",927,92.7,"p:05_07_2025_12_58_48"],
+  ["220","7CM COLOUR SPARKLERS 10BOX","10BOX",1081.5,108.15,"p:05_07_2025_12_57_32"],
+  ["221","7CM GREEN SPARKLERS 10BOX","10BOX",1184.5,118.45,"p:05_07_2025_12_56_53"],
+  ["222","7CM RED SPARKLERS 10BOX","10BOX",1493.5,149.35,"p:05_07_2025_12_56_29"],
+  ["223","1O CM ELECTRIC SPARKLERS 5BOX","5BOX",927,92.7,"p:05_07_2025_12_56_03"],
+  ["224","10CM COLOUR SPARKLERS 5BOX","5BOX",772.5,77.25,"p:05_07_2025_12_55_32"],
+  ["225","10CM GREEN SPARKLERS 5BOX","5BOX",824,82.4,"p:05_07_2025_12_54_59"],
+  ["226","10CM RED SPARKLERS 5BOX","5 BOX",1030,103,"p:05_07_2025_12_54_23"],
+  ["227","10CM 5IN 1","1BOX",824,82.4,"p:10_08_2025_01_03_26"],
+  ["228","12CM ELECTRIC SPARKLERS 5BOX","5BOX",1091.8,109.18,"p:05_07_2025_12_53_54"],
+  ["229","12CM COLOUR SPARKLERS 5BOX","5BOX",1339,133.9,"p:05_07_2025_12_53_13"],
+  ["230","12CM GREEN SPARKLERS 5BOX","5BOX",1390.5,139.05,"p:05_07_2025_12_52_45"],
+  ["231","12CM RED SPARKLERS 5BOX","5BOX",1545,154.5,"p:05_07_2025_12_52_25"],
+  ["232","15CM ELECTRIC SPARKLERS 2BOX","2BOX",824,82.4,"p:10_08_2025_01_04_00"],
+  ["233","15CM COLOUR SPARKLERS 2BOX","2BOX",885.8,88.58,"p:03_07_2025_07_29_21"],
+  ["234","15CM GREEN SPARKLERS 2BOX","2BOX",927,92.7,"p:03_07_2025_07_28_58"],
+  ["235","15CMRED SPARKLERS 2BOX","2BOX",1030,103,"p:03_07_2025_07_28_16"],
+  ["236","15CM 5IN1 SPARKLERS","1BOX",2060,206,"p:12_07_2025_12_52_58"],
+  ["237","30CM ELECTRIC SPARKLERS 2BOX","2BOX",824,82.4,"p:12_07_2025_12_53_56"],
+  ["238","30CM COLOUR SPARKLERS 2BOX","2BOX",885.8,88.58,"p:12_07_2025_12_54_13"],
+  ["239","30CM GREEN SPARKLERS 2BOX","2BOX",927,92.7,"p:03_07_2025_07_27_38"],
+  ["240","30CM RED SPARKLERS 2BOX","2BOX",1030,103,"p:03_07_2025_07_27_05"],
+  ["241","30CM 3IN1 SPARKLERS","1BOX",1339,133.9,"p:10_08_2025_01_04_54"],
+  ["242","50CM ELECTRIC SPARKLERS 1ROLL","1ROLL",1596.5,159.65,"p:03_07_2025_07_26_22"],
+  ["243","50CM COLOUR SPARKLERS 1ROLL","1ROLL",1905.5,190.55,"p:03_07_2025_07_25_51"],
+  ["245A","10CM NANOTECH","1BOX",360.5,36.05,"p:12_07_2025_01_15_11"],
+  ["245B","15CM NANOTECH","1BOX",412,41.2,"p:15_07_2025_09_16_43"],
+  ["245C","30CM NANOTECH","1BOX",412,41.2,"p:07_08_2025_09_06_20"],
+  ["245D","ROLLING SPARKLERS","1BOX",1545,154.5,"p:10_08_2025_12_10_32"],
+  ["245AB","ROUND SPARKLERS 1PCS","1BOX",257.5,25.75,"p:21_07_2026_12_26_32"],
+  ["245VBV","DISIEN HEART,STAR,TRIANGAL,ROUND,SWASTIC SPARKLERS 3PCS","1BOX",1030,103,"d:1788420408_6a9921387d4bd"],
+  ["254DF","15CM BLUE COLOUR SPARKLERS","1BOX",927,92.7,"d:1788420408_6a9921387d4bd"]
+ ]},
+ {cat:"MUSICAL ITAMES", note:"Net rate", items:[
+  ["271","SWEED 16 SHOT MUSICAL SHOT","1BOX",391.4,391.4,"p:10_08_2025_01_14_45"],
+  ["272","25SHOT MUSICAL SONNY","1BOX",669.5,669.5,"p:10_08_2025_01_15_06"],
+  ["273","MUSICAL CHAKKAR ANIL TWO TIAM SHOUND","1BOX",206,206,"d:1788420408_6a9921387d4bd"],
+  ["274","MUSICAL CKAKKAR SRI VIJAYI","1BOX",113.3,113.3,"p:10_08_2025_01_16_28"],
+  ["254NB","MEHA SIRAN ELEPHANT 2PCS","1BOX",185.4,185.4,"p:21_07_2026_12_21_06"],
+  ["254CV","MINI SIRAN ELIPHANT @AJANTHA","1BOX",243.08,243.08,"p:21_07_2026_12_18_58"],
+  ["271A","12SHOT MUSIAL SHOT SRI VIJAY","1BOX",360.5,360.5,"d:1786539246_6a7c6cee843eb"]
+ ]},
+ {cat:"GUN @RING CAPS", note:"Net rate", items:[
+  ["275","MIB GUN SONNY","1BOX",103,103,"p:07_08_2025_09_03_03"],
+  ["276","PIRATES GUN SONNY","1BOX",164.8,164.8,"p:07_08_2025_09_04_05"],
+  ["277","TERMINATOR GUN SONNY","1BOX",278.1,278.1,"p:07_08_2025_09_03_32"],
+  ["278","RING CAP","1PKT",10.3,10.3,"p:10_08_2025_01_17_13"],
+  ["292C","SONNY BLACK SARPENT","1BOX",30.9,30.9,"p:10_08_2025_11_58_56"]
+ ]},
+ {cat:"GIFTBOX", note:"Net rate", items:[
+  ["279","18ITAMS","1OX",309,309,"p:07_08_2025_08_51_37"],
+  ["280","23ITAMS GIFT PACK","1BOX",391.4,391.4,"p:07_08_2025_08_52_28"],
+  ["281","32ITAMS GIFT BOX","1BOX",556.2,556.2,"p:07_08_2025_08_53_35"],
+  ["282","41 ITAMS GIFT BOX","1BOX",731.3,731.3,"p:07_08_2025_08_56_48"],
+  ["283","54ITAMS GIFT BOX","1BOX",1133,1133,"p:07_08_2025_08_57_36"],
+  ["284","72 ITAMS DIFT BOX","1BOX",1678.9,1678.9,"p:07_08_2025_08_58_29"]
+ ]},
+ {cat:"COLOUR MATCHERS", note:"Net rate", items:[
+  ["265df","colourmatchers deluxe","1box",267.8,267.8,"d:1788420408_6a9921387d4bd"]
+ ]},
+ {cat:"SUPER MEGA FOUNTAIN", note:"90% off", items:[
+  ["133AB","JELLY BEAN GIANT 10PCS ELEPHANT","1BOX",2925.2,292.52,"p:21_07_2026_12_17_16"],
+  ["133AC","JELLY BEEN SUPER 10PCS ELEPHANT","1BOX",6828.9,682.89,"p:21_07_2026_12_16_34"],
+  ["133AD","JELLY BEEN DELUXE 10PCS ELEPHANT","1BOX",8950.7,895.07,"p:21_07_2026_12_16_04"],
+  ["133AE","12' MEGA POTS LOVE STREET 1PCS ELEPHANT","1BOX",3203.3,320.33,"p:21_07_2026_12_12_49"]
+ ]},
+ {cat:"NEW ARRIVALS SPECIAL 2026", note:"90% off", items:[
+  ["300AB","FAST@FURIOUS 25SHOT 3IN1 COMBO ELEPHANT 3PCS","1BOX",13019.2,1301.92,"p:21_07_2026_12_11_34"],
+  ["300AC","DOBLE DECKER 10SHOT DUAL FUNCTION ELEPHANT 2026 NEW","1BOX",8137,813.7,"p:21_07_2026_12_11_13"],
+  ["300AD","10*10 CLASH OF TITANS ELEPHANT 2026 NEW","1BOX",30745.5,3074.55,"p:21_07_2026_12_10_48"],
+  ["300AE","10*10 COLOUR OF THE RAINBOW 2026 NWE ELEPHANT","1BOX",30745.5,3074.55,"p:21_07_2026_12_09_32"],
+  ["300AF","10*10 THUNDERS OF THE GOD 2026 NEW ELEPHANT","1BOX",56371.9,5637.19,"p:21_07_2026_12_08_47"],
+  ["300AG","5*10 TWISTER 2026 NEW SET OUT 2026 NEW ELEPHANT","1BOX",40664.4,4066.44,"p:21_07_2026_12_08_04"],
+  ["300AS","5*20 ROLLER COASTER NEW 2026 ELEPHANT","1BOX",82400,8240,"p:21_07_2026_12_02_33"],
+  ["300AR","NARANG(9 IN 1)3.5PIP COMBO ELEPHANT 2026 NEW","1BOX",35143.6,3514.36,"p:21_07_2026_12_02_12"],
+  ["300KS","TEDDY,SIMBA,LOVE,TIGER VARIETY BOX 3PCS NEW","1BOX",1030,103,"d:1787066889_6a847a098301b"],
+  ["1A","LADOO 3PCS COLOUR @CRACKLING SHOWER MEGA","1BOX",1545,154.5,"d:1789478715_6aa9473b17c9a"],
+  ["1B","COLOUR FISH@DRAGON CANDIEL 2PCS","IBOX",1236,123.6,"d:1789478917_6aa948051fb0f"],
+  ["1C","DOUBLE COLOUR PANDA,NEMO,MINIONS 1PCS","1BOX",669.5,66.95,"d:1789479077_6aa948a51a393"],
+  ["1D","APPLE,ORANGE,PLUM,DOPLE COLOUR 1PCS","1BOX",1390.5,139.05,"d:1789479404_6aa949ec6b599"],
+  ["1E","JUNGLE ITAMES SHOER MEGA","1BOX",2163,216.3,"d:1789479667_6aa94af35d2f2"]
+ ]},
+ {cat:"SPECIAL OFFER ITAMES LOW STOCK ITAMES", note:"Net rate", items:[
+  ["406","OUT PKT BOMB10PCS","1BOX",154.5,154.5,"d:1788420408_6a9921387d4bd"],
+  ["415","EURO STAR 6IN1 CHAKKAR AJANTHA","1BOX",221.45,221.45,"d:1788420408_6a9921387d4bd"],
+  ["416","TRAIN ANNALAKASHMI ONE BY 5 COLOURS","1BOX",221.45,221.45,"d:1788420408_6a9921387d4bd"],
+  ["417","MILANO ICE GREM 1PCS AJANTHA","1BOX",154.5,154.5,"d:1788420408_6a9921387d4bd"],
+  ["418","PINKIE PIE 1PCS AJANTHA","1BOX",159.65,159.65,"d:1788420408_6a9921387d4bd"],
+  ["419","TUITY FRUITY CHAKKAR @ FLOWER 5PCS","1BOX",257.5,257.5,"d:1788420408_6a9921387d4bd"],
+  ["420","MAGIC BUZZS AJANTHA","1BOX",257.5,257.5,"d:1788420408_6a9921387d4bd"]
+ ]}
+];
+
+</script>
+<script>
+(function(){
+  const PEOPLE = ["Mansoor","Nagendra","Santosh"];
+  const PCLASS = {Mansoor:"q-m",Nagendra:"q-n",Santosh:"q-s"};
+  const IMG = "https://r2.sriseosolutions.com/";
+  const QTY_OPTS = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,25,30,40,50];
+  const inr = new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR",maximumFractionDigits:2,minimumFractionDigits:0});
+  const fmt = n => inr.format(Math.round(n*100)/100);
+
+  // Flatten catalog
+  const products = [];
+  const byCode = {};
+  CATALOG.forEach((c,ci)=>c.items.forEach(r=>{
+    const [code,name,content,mrp,price,img] = r;
+    const src = img.startsWith("p:") ? IMG+".com/upload/product_image_"+img.slice(2)+".webp" : IMG+"djcrackers.com/upload/"+img.slice(2)+".webp";
+    const key=(code+"_"+name).replace(/[^A-Za-z0-9]+/g,"_");
+    const p = {code,name,content,mrp,price,src,ci,key,imgId:img};
+    products.push(p); if(!(code in byCode)) byCode[code]=p;
+  }));
+
+  // State: confirmed (from server) + local overrides waiting to save
+  const remote = {Mansoor:{},Nagendra:{},Santosh:{}};
+  const pending = {Mansoor:{},Nagendra:{},Santosh:{}};
+  const inflight = {Mansoor:{},Nagendra:{},Santosh:{}};
+  const exists = {Mansoor:false,Nagendra:false,Santosh:false};
+  const qty = (person,code) => {
+    if (code in pending[person]) return pending[person][code];
+    if (code in inflight[person]) return inflight[person][code];
+    const r=remote[person];
+    if (code in r) return Number(r[code]||0);
+    // picks saved by the first version were keyed by product code alone
+    const p=byKey[code];
+    if (p && byCode[p.code]===p && (p.code in r)) return Number(r[p.code]||0);
+    return 0;
+  };
+  const byKey={}; products.forEach(p=>byKey[p.key]=p);
+
+  // ---- Build DOM once
+  const $cat = document.getElementById("cat");
+  CATALOG.forEach((c,i)=>{const o=document.createElement("option");o.value=String(i);o.textContent=c.cat;$cat.appendChild(o);});
+  const main = document.getElementById("catalog");
+  const rowEls = {};
+  const ytIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M23 7.2a3 3 0 0 0-2.1-2.1C19 4.6 12 4.6 12 4.6s-7 0-8.9.5A3 3 0 0 0 1 7.2 31 31 0 0 0 .5 12 31 31 0 0 0 1 16.8a3 3 0 0 0 2.1 2.1c1.9.5 8.9.5 8.9.5s7 0 8.9-.5a3 3 0 0 0 2.1-2.1c.4-1.6.5-4.8.5-4.8s0-3.2-.5-4.8zM9.7 15.1V8.9l5.8 3.1-5.8 3.1z"/></svg>';
+  const sections = [];
+  CATALOG.forEach((c,ci)=>{
+    const sec = document.createElement("section"); sec.className="cat";
+    const h = document.createElement("h2");
+    h.innerHTML = '<span></span><span class="tag"></span><span class="count"></span>';
+    h.children[0].textContent = c.cat; h.children[1].textContent = c.note;
+    const list = document.createElement("div"); list.className="list";
+    sec.append(h,list); main.appendChild(sec);
+    sections.push({sec,list,countEl:h.children[2],ci});
+  });
+  products.forEach(p=>{
+    const row = document.createElement("div"); row.className="row";
+    // Photos are stored with the page (photos/<id>.webp); tapping one opens the shop's
+    // full-size picture in a new tab. A missing photo leaves the "Photo" button showing.
+    const img = document.createElement("a"); img.className="thumb"; img.href=p.src; img.target="_blank"; img.rel="noopener";
+    img.setAttribute("aria-label","Open photo of "+p.name);
+    img.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M21 16l-5-5-8 8"/></svg><span>Photo</span>';
+    const pic=document.createElement("img"); pic.alt=""; pic.loading="lazy"; pic.src="photos/"+p.imgId.replace(":","_")+".webp";
+    pic.onerror=()=>pic.remove(); img.appendChild(pic);
+    const nm = document.createElement("div"); nm.className="nm";
+    nm.innerHTML='<div class="name"></div><div class="meta"></div>';
+    nm.children[0].textContent=p.name;
+    nm.children[1].textContent="Code "+p.code+" · "+p.content;
+    const yt = document.createElement("a"); yt.className="yt"; yt.target="_blank"; yt.rel="noopener";
+    yt.href="https://www.youtube.com/results?search_query="+encodeURIComponent(p.name+" cracker");
+    yt.innerHTML=ytIcon+"<span>Watch</span>"; yt.setAttribute("aria-label","Search YouTube for "+p.name);
+    const pr = document.createElement("div"); pr.className="price";
+    pr.innerHTML="<b></b><s></s>"; pr.children[0].textContent=fmt(p.price);
+    if (p.mrp!==p.price) pr.children[1].textContent=fmt(p.mrp);
+    const qtys = document.createElement("div"); qtys.className="qtys";
+    const sels = {}, pamts = {};
+    PEOPLE.forEach(person=>{
+      const w=document.createElement("div"); w.className="qty "+PCLASS[person];
+      const id="q-"+person+"-"+p.key;
+      const lb=document.createElement("label"); lb.htmlFor=id; lb.textContent=person;
+      const s=document.createElement("select"); s.id=id; s.setAttribute("aria-label",person+" quantity for "+p.name);
+      const o0=document.createElement("option"); o0.value=0; o0.textContent=0; s.appendChild(o0);
+      ["pointerdown","touchstart","focus","keydown"].forEach(ev=>s.addEventListener(ev,()=>fillOpts(s),{passive:true}));
+      s.addEventListener("change",()=>setQty(person,p.key,Number(s.value)));
+      const pa=document.createElement("div"); pa.className="pamt"; pa.setAttribute("aria-live","polite");
+      w.append(lb,s,pa); qtys.appendChild(w); sels[person]=s; pamts[person]=pa;
+    });
+    const tot=document.createElement("div"); tot.className="total zero"; tot.textContent="–";
+    qtys.appendChild(tot);
+    row.append(img,nm,yt,pr,qtys);
+    sections[p.ci].list.appendChild(row);
+    rowEls[p.key]={row,sels,pamts,tot};
+  });
+  const emptyMsg=document.createElement("div"); emptyMsg.className="empty"; emptyMsg.hidden=true;
+  emptyMsg.textContent="Nothing matches. Clear the search or change the filter.";
+  main.appendChild(emptyMsg);
+
+  // ---- Render values + totals
+  // Dropdowns start with just their current value and get the full list on first touch,
+  // which keeps 1,000+ dropdowns light on phones.
+  function fillOpts(sel){
+    if (sel.dataset.full) return; sel.dataset.full="1";
+    const cur=Number(sel.value);
+    const vals=[...new Set([...QTY_OPTS,cur])].sort((x,y)=>x-y);
+    sel.textContent="";
+    vals.forEach(v=>{const o=document.createElement("option");o.value=v;o.textContent=v;sel.appendChild(o);});
+    sel.value=String(cur);
+  }
+  function ensureOption(sel,v){
+    if (![...sel.options].some(o=>Number(o.value)===v)){const o=document.createElement("option");o.value=v;o.textContent=v;sel.appendChild(o);}
+  }
+  function paint(){
+    const sum={Mansoor:0,Nagendra:0,Santosh:0}, cnt={Mansoor:0,Nagendra:0,Santosh:0};
+    products.forEach(p=>{
+      const r=rowEls[p.key]; let rowQty=0;
+      PEOPLE.forEach(person=>{
+        const v=qty(person,p.key); const s=r.sels[person];
+        ensureOption(s,v);
+        if (Number(s.value)!==v && document.activeElement!==s) s.value=String(v);
+        s.classList.toggle("on",v>0);
+        const amt = v>0 ? fmt(v*p.price) : "";
+        if (r.pamts[person].textContent!==amt) r.pamts[person].textContent=amt;
+        rowQty+=v; sum[person]+=v*p.price; cnt[person]+=v;
+      });
+      r.row.classList.toggle("picked",rowQty>0);
+      r.tot.textContent = rowQty>0 ? fmt(rowQty*p.price) : "–";
+      r.tot.classList.toggle("zero",rowQty===0);
+      r.rowQty=rowQty;
+    });
+    let all=0,allc=0;
+    PEOPLE.forEach(person=>{
+      document.getElementById("t-"+person).textContent=fmt(sum[person]);
+      document.getElementById("c-"+person).textContent=cnt[person]+(cnt[person]===1?" item":" items");
+      all+=sum[person]; allc+=cnt[person];
+    });
+    document.getElementById("t-all").textContent=fmt(all);
+    document.getElementById("c-all").textContent=allc+(allc===1?" item":" items");
+    filter();
+  }
+
+  // ---- Filtering
+  const $q=document.getElementById("q"), $show=document.getElementById("show");
+  function filter(){
+    const q=$q.value.trim().toLowerCase(), cat=$cat.value, show=$show.value;
+    let shownTotal=0;
+    const perSec=sections.map(()=>0);
+    products.forEach(p=>{
+      const r=rowEls[p.key];
+      let ok = (!q || p.name.toLowerCase().includes(q) || p.code.toLowerCase()===q) && (cat==="" || String(p.ci)===cat);
+      if (ok && show==="any") ok = r.rowQty>0;
+      else if (ok && show!=="all") ok = qty(show,p.key)>0;
+      r.row.hidden=!ok; if(ok){perSec[p.ci]++;shownTotal++;}
+    });
+    sections.forEach((s,i)=>{s.sec.hidden=perSec[i]===0; s.countEl.textContent=perSec[i]+(perSec[i]===1?" item":" items");});
+    emptyMsg.hidden=shownTotal>0;
+    document.querySelectorAll(".tile").forEach(t=>t.setAttribute("aria-pressed",String(t.dataset.p===show)));
+  }
+  $q.addEventListener("input",filter); $cat.addEventListener("change",filter); $show.addEventListener("change",filter);
+  document.querySelectorAll(".tile").forEach(t=>t.addEventListener("click",()=>{
+    $show.value = $show.value===t.dataset.p ? "all" : t.dataset.p; filter();
+    window.scrollTo({top:0,behavior:"smooth"});
+  }));
+
+  // ---- Status
+  const $st=document.getElementById("status"), $stt=document.getElementById("statusText"), $notice=document.getElementById("notice");
+  function status(s,t){$st.dataset.s=s;$stt.textContent=t;}
+  function notice(t){$notice.textContent=t;$notice.hidden=!t;}
+
+  // ---- Saving (Firebase Realtime Database, REST API; address set in config.js)
+  const FB=(window.FIREBASE_URL||"").trim().replace(/\/+$/,"");
+  const timers={}, busy={};
+  const idle=()=>!PEOPLE.some(x=>busy[x]||Object.keys(pending[x]).length);
+  function setQty(person,key,v){
+    pending[person][key]=v;
+    paint();
+    if (!FB){ status("local","Not saved: storage isn't set up yet"); return; }
+    status("saving","Saving…");
+    clearTimeout(timers[person]);
+    timers[person]=setTimeout(()=>flush(person),400);
+  }
+  async function flush(person){
+    if (busy[person]) return;
+    const batch=pending[person]; if (!Object.keys(batch).length) return;
+    pending[person]={}; inflight[person]=Object.assign({},batch);
+    busy[person]=true;
+    try{
+      // PATCH only touches the items being changed, so people editing at the same time don't overwrite each other
+      const r=await fetch(FB+"/orders/"+person+".json",{method:"PATCH",body:JSON.stringify(batch)});
+      if(!r.ok){ const e=new Error("http"); e.status=r.status; throw e; }
+      Object.assign(remote[person],batch);
+      inflight[person]={}; busy[person]=false;
+      if (Object.keys(pending[person]).length) flush(person);
+      else if (idle()) status("saved","All changes saved");
+    }catch(e){
+      busy[person]=false;
+      pending[person]=Object.assign({},inflight[person],pending[person]); inflight[person]={};
+      if (e.status===401||e.status===403){
+        status("error","Not saved");
+        notice("The database refused the change. In Firebase, open Realtime Database → Rules and allow read and write.");
+      } else {
+        status("error","Not saved, retrying…");
+        setTimeout(()=>flush(person),3000);
+      }
+      paint();
+    }
+  }
+
+  // ---- PDF of the order
+  const PDF_LIBS=[
+    ["https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js","https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"],
+    ["https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js","https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"]
+  ];
+  function loadScript(src){return new Promise((ok,bad)=>{const s=document.createElement("script");s.src=src;s.onload=ok;s.onerror=bad;document.head.appendChild(s);});}
+  async function loadPdfLibs(){
+    for (const alts of PDF_LIBS){
+      if (alts[0].includes("autotable") && window.jspdf && window.jspdf.jsPDF && window.jspdf.jsPDF.API.autoTable) continue;
+      if (!alts[0].includes("autotable") && window.jspdf) continue;
+      let loaded=false;
+      for (const u of alts){ try{ await loadScript(u); loaded=true; break; }catch(e){} }
+      if(!loaded) throw new Error("lib");
+    }
+  }
+  const $barMsg=document.getElementById("barMsg");
+  let msgTimer;
+  function barMsg(t){ $barMsg.textContent=t; $barMsg.hidden=!t; clearTimeout(msgTimer); if(t) msgTimer=setTimeout(()=>{$barMsg.hidden=true;},6000); }
+  function orderData(){
+    const groups=[];
+    CATALOG.forEach((c,ci)=>{
+      const rows=products.filter(p=>p.ci===ci).map(p=>{
+        const q={}; PEOPLE.forEach(x=>q[x]=qty(x,p.key));
+        const t=PEOPLE.reduce((a,x)=>a+q[x],0);
+        return t>0?{code:p.code,name:p.name,price:p.price,q,t}:null;
+      }).filter(Boolean);
+      if(rows.length) groups.push({cat:c.cat,rows});
+    });
+    return groups;
+  }
+  window.__buildOrderPdf = buildOrderPdf; // exposed for testing
+  function buildOrderPdf(jsPDF, groups, when){
+    const rs = n => "Rs. "+(Math.round(n*100)/100).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2});
+    const doc=new jsPDF({unit:"pt",format:"a4"});
+    const W=doc.internal.pageSize.getWidth();
+    doc.setFont("helvetica","bold"); doc.setFontSize(18); doc.text("Diwali Cracker Order",40,48);
+    doc.setFont("helvetica","normal"); doc.setFontSize(10); doc.setTextColor(90);
+    doc.text("Goat Crackers (djcrackers.com) price list  |  Generated "+when,40,64);
+    doc.setTextColor(0);
+    const body=[]; const per={}; PEOPLE.forEach(x=>per[x]={q:0,amt:0}); let grand=0;
+    groups.forEach(g=>{
+      body.push([{content:g.cat,colSpan:8,styles:{fillColor:[42,31,74],textColor:[255,246,232],fontStyle:"bold",fontSize:10}}]);
+      g.rows.forEach(r=>{
+        PEOPLE.forEach(x=>{per[x].q+=r.q[x]; per[x].amt+=r.q[x]*r.price;});
+        grand+=r.t*r.price;
+        body.push([r.code,r.name,rs(r.price),r.q.Mansoor||"",r.q.Nagendra||"",r.q.Santosh||"",r.t,rs(r.t*r.price)]);
+      });
+    });
+    doc.autoTable({
+      startY:80, head:[["Code","Item","Price","Mansoor","Nagendra","Santosh","Qty","Amount"]], body,
+      foot:[["","Total","",per.Mansoor.q,per.Nagendra.q,per.Santosh.q,PEOPLE.reduce((a,x)=>a+per[x].q,0),rs(grand)]],
+      theme:"grid", styles:{fontSize:9,cellPadding:4,valign:"middle"},
+      headStyles:{fillColor:[217,115,13],textColor:255}, footStyles:{fillColor:[240,236,248],textColor:20,fontStyle:"bold"},
+      columnStyles:{0:{cellWidth:44},2:{halign:"right",cellWidth:62},3:{halign:"center",cellWidth:50},4:{halign:"center",cellWidth:54},5:{halign:"center",cellWidth:50},6:{halign:"center",cellWidth:34},7:{halign:"right",cellWidth:72}},
+      margin:{left:40,right:40}, showFoot:"lastPage",
+      didParseCell:c=>{ const al={2:"right",3:"center",4:"center",5:"center",6:"center",7:"right"}[c.column.index]; if(al && c.section!=="body") c.cell.styles.halign=al; }
+    });
+    let y=doc.lastAutoTable.finalY+24;
+    if (y>doc.internal.pageSize.getHeight()-150){ doc.addPage(); y=48; }
+    doc.setFont("helvetica","bold"); doc.setFontSize(13); doc.text("Totals by person",40,y);
+    doc.autoTable({
+      startY:y+8, head:[["Person","Items","Amount"]],
+      body:PEOPLE.map(x=>[x,per[x].q,rs(per[x].amt)]),
+      foot:[["Grand total",PEOPLE.reduce((a,x)=>a+per[x].q,0),rs(grand)]],
+      theme:"grid", styles:{fontSize:11,cellPadding:6}, headStyles:{fillColor:[42,31,74],textColor:[255,246,232]},
+      footStyles:{fillColor:[217,115,13],textColor:255,fontStyle:"bold"},
+      columnStyles:{1:{halign:"center"},2:{halign:"right"}}, margin:{left:40,right:W-340},
+      didParseCell:c=>{ const al={1:"center",2:"right"}[c.column.index]; if(al) c.cell.styles.halign=al; }
+    });
+    return doc;
+  }
+  const $pdf=document.getElementById("pdfBtn");
+  $pdf.addEventListener("click", async ()=>{
+    const groups=orderData();
+    if(!groups.length){ barMsg("Pick at least one item first, then download the PDF."); return; }
+    $pdf.disabled=true; barMsg("Preparing PDF…");
+    try{
+      await loadPdfLibs();
+      const now=new Date();
+      const when=now.toLocaleString("en-IN",{day:"numeric",month:"short",year:"numeric",hour:"numeric",minute:"2-digit"});
+      const doc=buildOrderPdf(window.jspdf.jsPDF, groups, when);
+      doc.save("cracker-order-"+now.toISOString().slice(0,10)+".pdf");
+      barMsg("PDF downloaded.");
+    }catch(e){
+      const c=e&&e.code;
+      if(c==="declined") barMsg("");
+      else if(c==="rate_limited") barMsg("A download prompt is already open.");
+      else if(e&&e.message==="lib") barMsg("Couldn't load the PDF maker. Check your connection and try again.");
+      else barMsg("Couldn't create the PDF. Try again.");
+    }finally{ $pdf.disabled=false; }
+  });
+
+  // ---- Connect: load picks and stream live changes from Firebase
+  function applyEvent(ev,isPatch){
+    let msg; try{ msg=JSON.parse(ev.data); }catch(e){ return; }
+    if(!msg) return;
+    const parts=(msg.path||"/").split("/").filter(Boolean), data=msg.data;
+    if (parts.length===0){
+      if (!isPatch) PEOPLE.forEach(x=>remote[x]={});
+      if (data) Object.keys(data).forEach(x=>{ if(PEOPLE.includes(x)) remote[x]=Object.assign({},data[x]||{}); });
+    } else if (parts.length===1){
+      const x=parts[0]; if(!PEOPLE.includes(x)) return;
+      if (isPatch) Object.assign(remote[x],data||{}); else remote[x]=Object.assign({},data||{});
+    } else {
+      const x=parts[0], k=parts[1]; if(!PEOPLE.includes(x)) return;
+      if (data===null) delete remote[x][k]; else remote[x][k]=data;
+    }
+    paint();
+    if (idle()) status("saved","All changes saved");
+  }
+  paint();
+  if (!FB){
+    status("local","Storage not set up");
+    notice("Picks can't be saved yet: this site still needs its database address.");
+  } else {
+    status("saving","Loading saved picks…");
+    const es=new EventSource(FB+"/orders.json");
+    es.addEventListener("put",e=>applyEvent(e,false));
+    es.addEventListener("patch",e=>applyEvent(e,true));
+    es.addEventListener("cancel",()=>{ status("error","No access"); notice("The database refused access. In Firebase, open Realtime Database → Rules and allow read and write."); });
+    es.onopen=()=>{ notice(""); };
+    es.onerror=()=>{ if(idle()) status("error","Reconnecting…"); };
+  }
+})();
+</script>
+
+</body>
+</html>
